@@ -1,0 +1,12 @@
+micronaut:
+  application:
+    name: desafiopix
+datasources:
+  default:
+    url: jdbc:postgresql://localhost:5432/desafiopix
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: 'postgres'
+    schema-generate: UPDATE
+    dialect: POSTGRES
+jpa.default.properties.hibernate.hbm2ddl.auto: update
