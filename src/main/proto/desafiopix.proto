@@ -2,19 +2,41 @@ syntax = "proto3";
 
 option java_multiple_files = true;
 option java_package = "com.zup";
-option java_outer_classname = "Desafiopix";
-option objc_class_prefix = "HLW";
+// option java_outer_classname = "Desafiopix"; -- Vai ser o nome que vai ser dado ao arquivo que vai guardar
+        // todos os dados, casos seja colocado false no java_multiple_files
+// option objc_class_prefix = "HLW"; -- Caso queira compilar para linguagem objective C
 
 package com.zup;
 
-service DesafiopixService {
-  rpc send (DesafiopixRequest) returns (DesafiopixReply) {}
+service KeymanagerCadastraService {
+    rpc cadastraChavePix(CadastraChavePixRequest) returns (CadastraChavePixResponse) {}
 }
 
-message DesafiopixRequest {
-  string name = 1;
+enum TipoDeChave {
+    CHAVE_DESCONHECIDA = 0;
+    CPF = 1;
+    CELULAR = 2;
+    EMAIL = 3;
+    CHAVE_ALEATORIA = 4;
 }
 
-message DesafiopixReply {
-  string message = 1;
+enum TipoDeConta {
+    CONTA_DESCONHECIDO = 0;
+    CONTA_CORRENTE = 1;
+    CONTA_POUPANCA = 2;
+}
+
+/**
+* Registra chave
+*/
+message CadastraChavePixRequest {
+    string clienteId = 1;
+    TipoDeChave tipoDeChave = 2;
+    string chave = 3;
+    TipoDeConta tipoDeConta = 4;
+}
+
+message CadastraChavePixResponse {
+    string clienteId = 1;
+    string pixId = 2;
 }
