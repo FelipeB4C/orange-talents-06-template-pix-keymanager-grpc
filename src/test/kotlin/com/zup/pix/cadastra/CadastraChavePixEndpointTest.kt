@@ -4,25 +4,19 @@ import com.zup.CadastraChavePixRequest
 import com.zup.KeymanagerCadastraServiceGrpc
 import com.zup.TipoDeChave
 import com.zup.TipoDeConta
-import com.zup.client.ItauClient
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
-import io.micronaut.http.HttpResponse
-import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import org.mockito.Mockito.*
 import java.util.*
-import javax.inject.Inject
 import javax.inject.Singleton
 
 @MicronautTest(transactional = false)
@@ -31,7 +25,7 @@ internal class CadastraChavePixEndpointTest(
     val grpcClient: KeymanagerCadastraServiceGrpc.KeymanagerCadastraServiceBlockingStub
 ) {
 
-   /* @Inject
+/*    @Inject
     lateinit var itauClient: ItauClient*/
 
     /*
@@ -314,7 +308,7 @@ internal class CadastraChavePixEndpointTest(
     }
 
 /*    @MockBean(ItauClient::class)
-    fun itauClientMock(): ItauClient? {
+    fun itauClientMock(): ItauClient {
         return Mockito.mock(ItauClient::class.java)
     }*/
 

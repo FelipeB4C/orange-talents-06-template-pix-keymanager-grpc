@@ -8,8 +8,13 @@ option java_package = "com.zup";
 
 package com.zup;
 
+
 service KeymanagerCadastraService {
     rpc cadastraChavePix(CadastraChavePixRequest) returns (CadastraChavePixResponse) {}
+}
+
+service KeymanagerDeletaService {
+    rpc deletaChavePix(DeletaChavePixRequest) returns (DeletaChavePixResponse){}
 }
 
 enum TipoDeChave {
@@ -39,4 +44,16 @@ message CadastraChavePixRequest {
 message CadastraChavePixResponse {
     string clienteId = 1;
     string pixId = 2;
+}
+
+/*
+* Deleta chave
+*/
+message DeletaChavePixRequest {
+    string clienteId = 1;
+    string pixId = 2;
+}
+
+message DeletaChavePixResponse {
+    string message = 1;
 }

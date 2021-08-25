@@ -23,9 +23,11 @@ class CadastraChavePixEndpoint(val cadastraChavePixService: CadastraChavePixServ
         responseObserver.onNext(
             CadastraChavePixResponse.newBuilder()
                 .setClienteId(chavePixSalva.clienteId.toString())
-                .setPixId(chavePixSalva.valorDaChave)
+                .setPixId(chavePixSalva.id.toString())
                 .build()
         )
+
+
 
         responseObserver.onCompleted()
 
