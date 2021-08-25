@@ -7,7 +7,6 @@ import com.zup.client.ItauClient
 import com.zup.compartilhados.annotations.ErrorHandler
 import com.zup.compartilhados.annotations.ValidUUID
 import com.zup.compartilhados.exceptions.ObjectNotFoundException
-import com.zup.pix.cadastra.ChavePix
 import com.zup.pix.cadastra.ChavePixRepository
 import io.grpc.stub.StreamObserver
 import io.micronaut.validation.Validated
@@ -15,6 +14,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import javax.inject.Singleton
 import javax.validation.Valid
+import javax.validation.constraints.NotNull
 
 @Validated
 @ErrorHandler
