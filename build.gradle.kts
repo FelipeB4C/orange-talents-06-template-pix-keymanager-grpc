@@ -49,8 +49,10 @@ dependencies {
     implementation("org.hibernate:hibernate-validator:6.1.6.Final")
 
     testImplementation("com.h2database:h2")
+    testImplementation("org.mockito:mockito-core:3.12.2")
 
 }
+
 
 
 application {
