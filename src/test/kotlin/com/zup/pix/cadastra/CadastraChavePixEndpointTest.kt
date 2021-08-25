@@ -11,8 +11,7 @@ import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -66,7 +65,7 @@ internal class CadastraChavePixEndpointTest(
 
             // Verificação
             assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
-            assertEquals("05944255145", response.pixId)
+            assertNotNull(response.pixId)
 
         }
 
@@ -86,7 +85,7 @@ internal class CadastraChavePixEndpointTest(
 
             // Verificação
             assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
-            assertEquals("+55985315806", response.pixId)
+            assertNotNull(response.pixId)
 
         }
 
@@ -106,7 +105,7 @@ internal class CadastraChavePixEndpointTest(
 
             // Verificação
             assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
-            assertEquals("felipe@email.com", response.pixId)
+            assertNotNull(response.pixId)
 
         }
 
