@@ -11,6 +11,7 @@ import com.zup.pix.cadastra.ChavePix
 import com.zup.pix.cadastra.ChavePixRepository
 import io.grpc.stub.StreamObserver
 import io.micronaut.validation.Validated
+import org.slf4j.LoggerFactory
 import java.util.*
 import javax.inject.Singleton
 import javax.validation.Valid
@@ -21,6 +22,8 @@ import javax.validation.Valid
 class DeletaChavePixEndpoint(val repository: ChavePixRepository, val itauClient: ItauClient) :
     KeymanagerDeletaServiceGrpc.KeymanagerDeletaServiceImplBase() {
 
+    val LOGGER = LoggerFactory.getLogger(this.javaClass)
+
     override fun deletaChavePix(
         request: DeletaChavePixRequest,
         responseObserver: StreamObserver<DeletaChavePixResponse>
@@ -29,17 +32,14 @@ class DeletaChavePixEndpoint(val repository: ChavePixRepository, val itauClient:
         val id = UUID.fromString(request.pixId)
         val clienteId = UUID.fromString(request.clienteId)
 
-        val validedRequest = request.toFieldValidation(id, clienteId)
+        request.toFieldValidation(id, clienteId)
 
         val verificaChavePix = repository.findByIdAndClienteId(id, clienteId)
-
-        if (verificaChavePix.isEmpty) throw ObjectNotFoundException("Chave pix não existe")
-
-        if (verificaChavePix.get().clienteId != clienteId) {
-            throw ObjectNotFoundException("Chave pix não encontrada ou não é desse cliente")
-        }
+            .orElseThrow{ObjectNotFoundException("Chave pix não existe ou não é desse cliente")}
 
         repository.deleteById(id)
+
+        LOGGER.info("Chave pix deletada com sucesso")
 
         responseObserver.onNext(
             DeletaChavePixResponse.newBuilder()
@@ -48,9 +48,7 @@ class DeletaChavePixEndpoint(val repository: ChavePixRepository, val itauClient:
         )
 
         responseObserver.onCompleted()
-
     }
-
 
 }
 
