@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import javax.inject.Singleton
 import javax.validation.Valid
+import kotlin.reflect.typeOf
 
 @Validated
 @ErrorHandler
@@ -54,7 +55,7 @@ class DeletaChavePixEndpoint(
 
         responseObserver.onNext(
             DeletaChavePixResponse.newBuilder()
-                .setMessage("Chave deletada com sucesso")
+                .setMessage("Chave deletada com sucesso do sistema interno")
                 .build()
         )
 

@@ -17,7 +17,7 @@ data class ChavePix(
     @field:NotNull val clienteId: UUID,
 
     @Column(unique = true, length = 77, nullable = false)
-    @field:NotBlank @field:Size(max = 77) val valorDaChave: String,
+    @field:NotBlank @field:Size(max = 77) var valorDaChave: String,
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
