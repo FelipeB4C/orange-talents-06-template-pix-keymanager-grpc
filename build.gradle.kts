@@ -46,7 +46,12 @@ dependencies {
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("io.micronaut:micronaut-http-client")
+
+    // Usar validações do hibernate ex: @CPF e CPFValidator()
     implementation("org.hibernate:hibernate-validator:6.1.6.Final")
+
+    // Para trabalhar com serialização xml
+    implementation("io.micronaut.xml:micronaut-jackson-xml")
 
     // testes
     testAnnotationProcessor("io.micronaut:micronaut-inject-java")

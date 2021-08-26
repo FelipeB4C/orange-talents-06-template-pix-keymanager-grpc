@@ -21,3 +21,7 @@ jpa.default.properties.hibernate.hbm2ddl.auto: create
 itau:
   contas:
     url: 'http://localhost:9091/api/v1'
+
+bcb:
+  chave:
+    url: 'http://localhost:8082/api/v1/pix/keys'

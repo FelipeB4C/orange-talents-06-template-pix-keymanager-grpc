@@ -1,36 +1,48 @@
 package com.zup.pix.cadastra
 
+import com.zup.client.BcbClient
+import com.zup.client.CreatePixKeyRequest
 import com.zup.compartilhados.exceptions.ObjectAlreadyExistsException
 import com.zup.compartilhados.exceptions.ObjectNotFoundException
 import com.zup.client.ItauClient
-import io.grpc.StatusException
+import com.zup.compartilhados.annotations.ErrorHandler
+import io.micronaut.http.HttpResponse
+import io.micronaut.http.client.exceptions.HttpClientResponseException
 import io.micronaut.validation.Validated
 import org.slf4j.LoggerFactory
-import java.util.*
 import javax.inject.Singleton
 import javax.transaction.Transactional
 import javax.validation.Valid
 
 @Validated
 @Singleton
-class CadastraChavePixService(val repository: ChavePixRepository, val itauClient: ItauClient) {
+class CadastraChavePixService(
+    val repository: ChavePixRepository,
+    val itauClient: ItauClient,
+    val bcbClient: BcbClient) {
 
     val LOGGER = LoggerFactory.getLogger(this.javaClass)
 
     @Transactional
     fun cadastraChavePix(@Valid chavePix: ChavePixFieldValidation): ChavePix {
 
-        val verificaSeContaExiste = itauClient.verificaCliente(chavePix.clienteId.toString(), chavePix.tipoDeConta.toString())
-        if (verificaSeContaExiste.isEmpty ) throw ObjectNotFoundException("Cliente não encontrado")
+        // Verifica se conta existe no sistema do ITAÚ
+        val dadosDoClient = itauClient.consultaConta(chavePix.clienteId.toString(), chavePix.tipoDeConta.toString())
+        if(dadosDoClient.body() == null) throw ObjectNotFoundException("Cliente não encontrado")
 
-        val verificaSeChaveJaExiste = repository.findByValorDaChave(chavePix.valorDaChave)
-        if (verificaSeChaveJaExiste.isPresent) throw ObjectAlreadyExistsException("Chave pix já cadastrada")
+        // Verifica se já existe uma chave pix com o mesmo valor
+        if( repository.findByValorDaChave(chavePix.valorDaChave).isPresent) throw ObjectAlreadyExistsException("Chave pix já cadastrada")
 
         val chavePix = chavePix.toModel()
 
-        val chavePixSalva = repository.save(chavePix)
+        val cadastraChaveBcbRequest = CreatePixKeyRequest.of(chavePix, dadosDoClient.body()!!)
+        val response = bcbClient.cadastraChavePixBcb(cadastraChaveBcbRequest).also {
+            LOGGER.info("Chave pix cadastrada no Bcb")
+        }
 
-        LOGGER.info("Chave pix cadastrada")
+        val chavePixSalva = repository.save(chavePix).also {
+            LOGGER.info("Chave pix cadastrada no sistema interno")
+        }
 
         return chavePixSalva
     }

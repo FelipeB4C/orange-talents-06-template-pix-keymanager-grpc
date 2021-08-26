@@ -27,8 +27,6 @@ class CadastraChavePixEndpoint(val cadastraChavePixService: CadastraChavePixServ
                 .build()
         )
 
-
-
         responseObserver.onCompleted()
 
     }

@@ -10,6 +10,8 @@ import io.grpc.stub.StreamObserver
 import io.micronaut.aop.InterceptorBean
 import io.micronaut.aop.MethodInterceptor
 import io.micronaut.aop.MethodInvocationContext
+import io.micronaut.http.client.exceptions.HttpClientResponseException
+import io.micronaut.http.client.netty.DefaultHttpClient
 import org.slf4j.LoggerFactory
 import javax.inject.Singleton
 import javax.validation.ConstraintViolationException
@@ -41,6 +43,7 @@ class ExceptionHandlerInterceptor: MethodInterceptor<BindableService, Any?> {
                 is IllegalStateException -> Status.FAILED_PRECONDITION.withDescription(e.message).asRuntimeException()
                 is ObjectNotFoundException -> Status.NOT_FOUND.withDescription(e.message).asRuntimeException()
                 is ObjectAlreadyExistsException -> Status.ALREADY_EXISTS.withDescription(e.message).asRuntimeException()
+             //   is HttpClientResponseException -> Status.UNKNOWN.withDescription(e.message).asRuntimeException()
                 is ConstraintViolationException -> handleConstraintViolationException(e)
                 else -> Status.UNKNOWN.withDescription("erro inesperado").asRuntimeException()
             }
