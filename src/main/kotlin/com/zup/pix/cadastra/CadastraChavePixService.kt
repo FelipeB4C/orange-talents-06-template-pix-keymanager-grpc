@@ -40,8 +40,8 @@ class CadastraChavePixService(
             LOGGER.info("Chave pix cadastrada no Bcb")
         }
 
-        chavePix.valorDaChave = response.body().key
-        
+        if (chavePix.tipoDeChave == TipoDeChavePix.CHAVE_ALEATORIA) chavePix.valorDaChave = response.body().key
+
         val chavePixSalva = repository.save(chavePix).also {
             LOGGER.info("Chave pix cadastrada no sistema interno")
         }
