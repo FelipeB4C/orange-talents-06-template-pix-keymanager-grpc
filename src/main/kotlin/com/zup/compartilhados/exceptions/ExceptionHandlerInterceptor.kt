@@ -43,7 +43,6 @@ class ExceptionHandlerInterceptor: MethodInterceptor<BindableService, Any?> {
                 is IllegalStateException -> Status.FAILED_PRECONDITION.withDescription(e.message).asRuntimeException()
                 is ObjectNotFoundException -> Status.NOT_FOUND.withDescription(e.message).asRuntimeException()
                 is ObjectAlreadyExistsException -> Status.ALREADY_EXISTS.withDescription(e.message).asRuntimeException()
-             //   is HttpClientResponseException -> Status.UNKNOWN.withDescription(e.message).asRuntimeException()
                 is ConstraintViolationException -> handleConstraintViolationException(e)
                 else -> Status.UNKNOWN.withDescription("erro inesperado").asRuntimeException()
             }

@@ -4,19 +4,25 @@ import com.zup.CadastraChavePixRequest
 import com.zup.KeymanagerCadastraServiceGrpc
 import com.zup.TipoDeChave
 import com.zup.TipoDeConta
+import com.zup.client.*
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
+import io.micronaut.http.HttpResponse
+import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import java.time.LocalDateTime
 import java.util.*
-import javax.inject.Singleton
+import javax.inject.Inject
 
 @MicronautTest(transactional = false)
 internal class CadastraChavePixEndpointTest(
@@ -24,8 +30,6 @@ internal class CadastraChavePixEndpointTest(
     val grpcClient: KeymanagerCadastraServiceGrpc.KeymanagerCadastraServiceBlockingStub
 ) {
 
-/*    @Inject
-    lateinit var itauClient: ItauClient*/
 
     /*
     * Cadastra chave pix - ok
@@ -35,6 +39,12 @@ internal class CadastraChavePixEndpointTest(
     * Exception usuário não existe no client do itáu - ok
     * */
 
+
+    @Inject
+    lateinit var itauClient: ItauClient
+
+    @Inject
+    lateinit var bcbClient: BcbClient
 
     @BeforeEach
     fun setup() {
@@ -46,269 +56,351 @@ internal class CadastraChavePixEndpointTest(
         val CLIENTE_ID = "5260263c-a3c1-4727-ae32-3bdb2538841b"
     }
 
-    @Nested
-    inner class CadastrandoChavePix {
+    @Test
+    fun `deve cadastrar uma chave pix usando cpf`() {
 
-        @Test
-        fun `deve cadastrar uma chave pix usando cpf`() {
+        Mockito.`when`(itauClient.consultaConta(clienteId = CLIENTE_ID, tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
 
-            // Ação
-            val response = grpcClient.cadastraChavePix(
-                CadastraChavePixRequest.newBuilder()
-                    .setClienteId(CLIENTE_ID)
-                    .setTipoDeChave(TipoDeChave.CPF)
-                    .setChave("05944255145")
-                    .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
-                    .build()
-            )
+        Mockito.`when`(bcbClient.cadastraChavePixBcb(createPixKeyRequest()))
+            .thenReturn(HttpResponse.created(createPixKeyResponse()))
+
+        // Ação
+        val response = grpcClient.cadastraChavePix(
+            CadastraChavePixRequest.newBuilder()
+                .setClienteId(CLIENTE_ID)
+                .setTipoDeChave(TipoDeChave.CPF)
+                .setChave("05944255145")
+                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                .build()
+        )
 
 
-            // Verificação
-            assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
-            assertNotNull(response.pixId)
+        // Verificação
+        assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
+        assertNotNull(response.pixId)
 
+    }
+
+    @Test
+    fun `deve cadastrar uma chave pix usando celular`() {
+
+        Mockito.`when`(itauClient.consultaConta(clienteId = CLIENTE_ID, tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
+
+        Mockito.`when`(bcbClient.cadastraChavePixBcb(createPixKeyRequest()))
+            .thenReturn(HttpResponse.created(createPixKeyResponse()))
+
+        // Ação
+        val response = grpcClient.cadastraChavePix(
+            CadastraChavePixRequest.newBuilder()
+                .setClienteId(CLIENTE_ID)
+                .setTipoDeChave(TipoDeChave.CELULAR)
+                .setChave("+55985315806")
+                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                .build()
+        )
+
+
+        // Verificação
+        assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
+        assertNotNull(response.pixId)
+
+    }
+
+    @Test
+    fun `deve cadastrar uma chave pix usando e-mail`() {
+
+        Mockito.`when`(itauClient.consultaConta(clienteId = CLIENTE_ID, tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
+
+        Mockito.`when`(bcbClient.cadastraChavePixBcb(createPixKeyRequest()))
+            .thenReturn(HttpResponse.created(createPixKeyResponse()))
+
+        // Ação
+        val response = grpcClient.cadastraChavePix(
+            CadastraChavePixRequest.newBuilder()
+                .setClienteId(CLIENTE_ID)
+                .setTipoDeChave(TipoDeChave.EMAIL)
+                .setChave("felipe@email.com")
+                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                .build()
+        )
+
+
+        // Verificação
+        assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
+        assertNotNull(response.pixId)
+
+    }
+
+/*    @Test
+    fun `deve cadastrar uma chave pix usando chave aleatoria`() {
+
+        Mockito.`when`(itauClient.consultaConta(clienteId = CLIENTE_ID, tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
+
+        Mockito.`when`(bcbClient.cadastraChavePixBcb(createPixKeyRequest()))
+            .thenReturn(HttpResponse.created(createPixKeyResponse()))
+
+        // Ação
+        val response = grpcClient.cadastraChavePix(
+            CadastraChavePixRequest.newBuilder()
+                .setClienteId(CLIENTE_ID)
+                .setTipoDeChave(TipoDeChave.CHAVE_ALEATORIA)
+                .setChave("")
+                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                .build()
+        )
+
+
+        // Verificação
+        assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
+        assertNotNull(response.pixId)
+
+    }*/
+
+
+    @Test
+    fun `deve capturar excecao de cpf invalido, chave pix invalida`() {
+
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
+            .setClienteId(CLIENTE_ID)
+            .setTipoDeChave(TipoDeChave.CPF)
+            .setChave("059-442-551-45")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .build()
+
+        val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
         }
 
-        @Test
-        fun `deve cadastrar uma chave pix usando celular`() {
-
-            // Ação
-            val response = grpcClient.cadastraChavePix(
-                CadastraChavePixRequest.newBuilder()
-                    .setClienteId(CLIENTE_ID)
-                    .setTipoDeChave(TipoDeChave.CELULAR)
-                    .setChave("+55985315806")
-                    .setTipoDeConta(TipoDeConta.CONTA_POUPANCA)
-                    .build()
-            )
-
-
-            // Verificação
-            assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
-            assertNotNull(response.pixId)
-
-        }
-
-        @Test
-        fun `deve cadastrar uma chave pix usando e-mail`() {
-
-            // Ação
-            val response = grpcClient.cadastraChavePix(
-                CadastraChavePixRequest.newBuilder()
-                    .setClienteId(CLIENTE_ID)
-                    .setTipoDeChave(TipoDeChave.EMAIL)
-                    .setChave("felipe@email.com")
-                    .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
-                    .build()
-            )
-
-
-            // Verificação
-            assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
-            assertNotNull(response.pixId)
-
-        }
-
-        @Test
-        fun `deve cadastrar uma chave pix usando chave aleatoria`() {
-
-            // Ação
-            val response = grpcClient.cadastraChavePix(
-                CadastraChavePixRequest.newBuilder()
-                    .setClienteId(CLIENTE_ID)
-                    .setTipoDeChave(TipoDeChave.CHAVE_ALEATORIA)
-                    .setChave("")
-                    .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
-                    .build()
-            )
-
-
-            // Verificação
-            assertEquals("5260263c-a3c1-4727-ae32-3bdb2538841b", response.clienteId)
-            assertNotNull(response.pixId)
-
+        // Verificação
+        with(error) {
+            assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
+            assertEquals("parametros de entrada inválidos", this.status.description)
         }
 
     }
 
-    @Nested
-    inner class NaoDeveCadastrar {
+    @Test
+    fun `deve capturar excecao de celular invalido, chave pix invalida`() {
 
-        @Test
-        fun `deve capturar excecao de cpf invalido, chave pix invalida`() {
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
+            .setClienteId(CLIENTE_ID)
+            .setTipoDeChave(TipoDeChave.CELULAR)
+            .setChave("985315806")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .build()
 
-            // Ação
-            val request = CadastraChavePixRequest.newBuilder()
+        val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
+        }
+
+        // Verificação
+        with(error) {
+            assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
+            assertEquals("parametros de entrada inválidos", this.status.description)
+        }
+
+    }
+
+    @Test
+    fun `deve capturar excecao de email invalido, chave pix invalida`() {
+
+
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
+            .setClienteId(CLIENTE_ID)
+            .setTipoDeChave(TipoDeChave.EMAIL)
+            .setChave("felipeemail.com")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .build()
+
+        val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
+        }
+
+        // Verificação
+        with(error) {
+            assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
+            assertEquals("parametros de entrada inválidos", this.status.description)
+        }
+    }
+
+    @Test
+    fun `deve capturar excecao de chave aleatoria preenchida, chave pix invalida`() {
+
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
+            .setClienteId(CLIENTE_ID)
+            .setTipoDeChave(TipoDeChave.CHAVE_ALEATORIA)
+            .setChave("5243-523YY-53452-34XX-5312")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .build()
+
+        val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
+        }
+
+        // Verificação
+        with(error) {
+            assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
+            assertEquals("parametros de entrada inválidos", this.status.description)
+        }
+
+    }
+
+    @Test
+    fun `deve capturar excecao de chave pix repetida`() {
+
+        Mockito.`when`(itauClient.consultaConta(clienteId = CLIENTE_ID, tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
+
+        // Cenário
+        val uuidCliente = UUID.fromString(CLIENTE_ID)
+        val usuario = ChavePix(uuidCliente, "felipe@email.com", TipoDeChavePix.EMAIL, TipoDeConta.CONTA_CORRENTE)
+        repository.save(usuario)
+
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
+            .setClienteId(CLIENTE_ID)
+            .setTipoDeChave(TipoDeChave.EMAIL)
+            .setChave("felipe@email.com")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .build()
+
+        val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
+        }
+
+        with(error) {
+            assertEquals(Status.ALREADY_EXISTS.code, this.status.code)
+            assertEquals("Chave pix já cadastrada", this.status.description)
+        }
+
+    }
+
+    @Test
+    fun `deve capturar excecao de uuid do cliente esta formatado invalido`() {
+
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
+            .setClienteId("17849717416713867345-8984386-3892")
+            .setTipoDeChave(TipoDeChave.EMAIL)
+            .setChave("felipe@email.com")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .build()
+
+        val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
+        }
+
+        // Verificação
+        with(error) {
+            assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
+            assertEquals("Invalid UUID string: 17849717416713867345-8984386-3892", this.status.description)
+        }
+    }
+
+    @Test
+    fun `deve capturar excecao quando tipo de chave ou tipo de conta for do tipo desconhecido`(){
+
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
                 .setClienteId(CLIENTE_ID)
-                .setTipoDeChave(TipoDeChave.CPF)
-                .setChave("059-442-551-45")
-                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                .setTipoDeChave(TipoDeChave.CHAVE_DESCONHECIDA)
+                .setChave("05944255145")
+                .setTipoDeConta(TipoDeConta.CONTA_DESCONHECIDO)
                 .build()
 
-            val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-                grpcClient.cadastraChavePix(request)
-            }
 
-            // Verificação
-            with(error) {
-                assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
-                assertEquals("parametros de entrada inválidos", this.status.description)
-            }
-
+        val erro = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
         }
 
-        @Test
-        fun `deve capturar excecao de celular invalido, chave pix invalida`() {
 
-            // Ação
-            val request = CadastraChavePixRequest.newBuilder()
-                .setClienteId(CLIENTE_ID)
-                .setTipoDeChave(TipoDeChave.CELULAR)
-                .setChave("985315806")
-                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
-                .build()
-
-            val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-                grpcClient.cadastraChavePix(request)
-            }
-
-            // Verificação
-            with(error) {
-                assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
-                assertEquals("parametros de entrada inválidos", this.status.description)
-            }
-
+        // Verificação
+        with(erro){
+            assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
         }
 
-        @Test
-        fun `deve capturar excecao de email invalido, chave pix invalida`() {
+    }
 
-            // Ação
-            val request = CadastraChavePixRequest.newBuilder()
-                .setClienteId(CLIENTE_ID)
-                .setTipoDeChave(TipoDeChave.EMAIL)
-                .setChave("felipeemail.com")
-                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
-                .build()
+    @Test
+    fun `deve capturar excecao de usuario  nao encontrado no client do itau`() {
 
-            val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-                grpcClient.cadastraChavePix(request)
-            }
+        Mockito.`when`(itauClient.consultaConta(clienteId = "5260263c-a3c1-4727-ae32-3bdb2538841", tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.noContent())
 
-            // Verificação
-            with(error) {
-                assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
-                assertEquals("parametros de entrada inválidos", this.status.description)
-            }
+        // Ação
+        val request = CadastraChavePixRequest.newBuilder()
+            .setClienteId("5260263c-a3c1-4727-ae32-3bdb2538841")
+            .setTipoDeChave(TipoDeChave.CELULAR)
+            .setChave("+55985314485")
+            .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+            .build()
+
+        val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+            grpcClient.cadastraChavePix(request)
         }
 
-        @Test
-        fun `deve capturar excecao de chave aleatoria preenchida, chave pix invalida`() {
-
-            // Ação
-            val request = CadastraChavePixRequest.newBuilder()
-                .setClienteId(CLIENTE_ID)
-                .setTipoDeChave(TipoDeChave.CHAVE_ALEATORIA)
-                .setChave("5243-523YY-53452-34XX-5312")
-                .setTipoDeConta(TipoDeConta.CONTA_POUPANCA)
-                .build()
-
-            val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-                grpcClient.cadastraChavePix(request)
-            }
-
-            // Verificação
-            with(error) {
-                assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
-                assertEquals("parametros de entrada inválidos", this.status.description)
-            }
-
-        }
-
-        @Test
-        fun `deve capturar excecao de chave pix repetida`() {
-
-            // Cenário
-            val uuidCliente = UUID.fromString(CLIENTE_ID)
-            val usuario = ChavePix(uuidCliente, "felipe@email.com", TipoDeChavePix.EMAIL, TipoDeConta.CONTA_CORRENTE)
-            repository.save(usuario)
-
-            // Ação
-            val request = CadastraChavePixRequest.newBuilder()
-                .setClienteId(CLIENTE_ID)
-                .setTipoDeChave(TipoDeChave.EMAIL)
-                .setChave("felipe@email.com")
-                .setTipoDeConta(TipoDeConta.CONTA_POUPANCA)
-                .build()
-
-            val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-                grpcClient.cadastraChavePix(request)
-            }
-
-            with(error) {
-                assertEquals(Status.ALREADY_EXISTS.code, this.status.code)
-                assertEquals("Chave pix já cadastrada", this.status.description)
-            }
-
-        }
-
-        @Test
-        fun `deve capturar excecao de uuid do cliente esta formatado invalido`() {
-
-            // Ação
-            val request = CadastraChavePixRequest.newBuilder()
-                .setClienteId("17849717416713867345-8984386-3892")
-                .setTipoDeChave(TipoDeChave.EMAIL)
-                .setChave("felipe@email.com")
-                .setTipoDeConta(TipoDeConta.CONTA_POUPANCA)
-                .build()
-
-            val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-                grpcClient.cadastraChavePix(request)
-            }
-
-            // Verificação
-            with(error) {
-                assertEquals(Status.INVALID_ARGUMENT.code, this.status.code)
-                assertEquals("Invalid UUID string: 17849717416713867345-8984386-3892", this.status.description)
-            }
-        }
-
-        @Test
-        fun `deve capturar excecao de usuario  nao encontrado no client do itau`() {
-
-            // Ação
-            val request = CadastraChavePixRequest.newBuilder()
-                .setClienteId("5260263c-a3c1-4727-ae32-3bdb2538841")
-                .setTipoDeChave(TipoDeChave.CELULAR)
-                .setChave("+55985314485")
-                .setTipoDeConta(TipoDeConta.CONTA_POUPANCA)
-                .build()
-
-            val error = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-                grpcClient.cadastraChavePix(request)
-            }
-
-            // Verificação
-            with(error) {
-                assertEquals(Status.NOT_FOUND.code, this.status.code)
-                assertEquals("Cliente não encontrado", this.status.description)
-            }
+        // Verificação
+        with(error) {
+            assertEquals(Status.NOT_FOUND.code, this.status.code)
+            assertEquals("Cliente não encontrado", this.status.description)
         }
     }
 
 
     @Factory
     class Clients {
-        @Singleton
+        @Bean
         fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeymanagerCadastraServiceGrpc.KeymanagerCadastraServiceBlockingStub? {
             return KeymanagerCadastraServiceGrpc.newBlockingStub(channel)
         }
     }
 
-/*    @MockBean(ItauClient::class)
+    @MockBean(ItauClient::class)
     fun itauClientMock(): ItauClient {
         return Mockito.mock(ItauClient::class.java)
-    }*/
+    }
+
+    @MockBean(BcbClient::class)
+    fun bcbClientMock(): BcbClient {
+        return Mockito.mock(BcbClient::class.java)
+    }
+
+    private fun dadosDaContaResponse(): DadosDaContaResponse {
+        return DadosDaContaResponse(
+            tipo = TipoDeConta.CONTA_CORRENTE,
+            instituicao = Instituicao("UNIBANCO ITAU SA", "60701190"),
+            agencia = "0001",
+            numero = "291900",
+            titular = Titular("Yuri Matheus", "86135457004")
+        )
+    }
+
+    private fun createPixKeyRequest(): CreatePixKeyRequest {
+        return CreatePixKeyRequest(
+            keyType = PixKeyType.CPF,
+            key = "Alguma chave",
+            bankAccount = BankAccount("60701190", "0001", "291900", BankAccount.AccountType.CACC),
+            owner = Owner(Owner.OwnerType.NATURAL_PERSON, "Nome da pessoa", "05988210933"),
+        )
+    }
+
+    private fun createPixKeyResponse(): CreatePixKeyResponse {
+        return CreatePixKeyResponse(
+            keyType = PixKeyType.CPF,
+            key = "Alguma chave",
+            bankAccount = BankAccount("60701190", "0001", "291900", BankAccount.AccountType.CACC),
+            owner = Owner(Owner.OwnerType.NATURAL_PERSON, "Nome da pessoa", "05988210933"),
+            createdAt = LocalDateTime.now()
+        )
+    }
+
 
 }

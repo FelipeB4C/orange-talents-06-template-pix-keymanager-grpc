@@ -1,25 +1,29 @@
 package com.zup.pix.deleta
 
 import com.zup.DeletaChavePixRequest
-import com.zup.KeymanagerCadastraServiceGrpc
 import com.zup.KeymanagerDeletaServiceGrpc
 import com.zup.TipoDeConta
+import com.zup.client.*
 import com.zup.pix.cadastra.ChavePix
 import com.zup.pix.cadastra.ChavePixRepository
 import com.zup.pix.cadastra.TipoDeChavePix
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
+import io.micronaut.http.HttpResponse
+import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import java.util.*
-import javax.inject.Singleton
+import javax.inject.Inject
 
 @MicronautTest(transactional = false)
 internal class DeletaChavePixEndpointTest(
@@ -32,6 +36,9 @@ internal class DeletaChavePixEndpointTest(
     * Não deve deletar se o pixId não for do ClientId - ok
     * Não deve deletar uma chave se os campos não forem UUID válidos
     * */
+
+    @Inject
+    lateinit var itauClient: ItauClient
 
     @BeforeEach
     fun criaChavePix1() {
@@ -63,6 +70,10 @@ internal class DeletaChavePixEndpointTest(
 
     @Test
     fun `deve deletar uma chave pix`() {
+
+        Mockito.`when`(itauClient.consultaCliente(clienteId = UUID.fromString(CLIENTE_ID1)))
+            .thenReturn(HttpResponse.ok(dadosDoClienteResponse()))
+
         // Cenário
             // -> Chaves pix cadastradas anteriormente pelos métodos criaChavePix1 e criaChavePix2
 
@@ -75,11 +86,15 @@ internal class DeletaChavePixEndpointTest(
         val response = grpcClient.deletaChavePix(request)
 
         // Verificação
-        assertEquals("Chave deletada com sucesso", response.message)
+        assertEquals("Chave deletada com sucesso do sistema interno", response.message)
     }
 
     @Test
     fun `nao deve deletar se o pixId não for do ClientId`() {
+
+        Mockito.`when`(itauClient.consultaCliente(clienteId = UUID.fromString(CLIENTE_ID1)))
+            .thenReturn(HttpResponse.ok(dadosDoClienteResponse()))
+
         // Cenário
             // -> Chaves pix cadastradas anteriormente pelos métodos criaChavePix1 e criaChavePix2
 
@@ -123,10 +138,34 @@ internal class DeletaChavePixEndpointTest(
 
     @Factory
     class Clients {
-        @Singleton
+        @Bean
         fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeymanagerDeletaServiceGrpc.KeymanagerDeletaServiceBlockingStub? {
             return KeymanagerDeletaServiceGrpc.newBlockingStub(channel)
         }
+    }
+
+    @MockBean(ItauClient::class)
+    fun itauClientMock(): ItauClient? {
+        return Mockito.mock(ItauClient::class.java)
+    }
+
+    private fun dadosDaContaResponse(): DadosDaContaResponse {
+        return DadosDaContaResponse(
+            tipo = TipoDeConta.CONTA_CORRENTE,
+            instituicao = Instituicao("UNIBANCO ITAU SA", "60701190"),
+            agencia = "0001",
+            numero = "291900",
+            titular = Titular("Yuri Matheus", "86135457004")
+        )
+    }
+
+    private fun dadosDoClienteResponse(): DadosDoClienteResponse {
+        return DadosDoClienteResponse(
+            id = UUID.fromString(CLIENTE_ID1),
+            nome = "Nome do usuário",
+            cpf = "86135457004",
+            instituicao = Instituicao("UNIBANCO ITAU SA", "60701190"),
+        )
     }
 
 }

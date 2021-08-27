@@ -14,6 +14,7 @@ interface ItauClient {
     @Get(value = "/clientes/{clienteId}/contas?tipo={tipo}")
     fun consultaConta(@PathVariable clienteId: String, @QueryValue tipo: String): HttpResponse<DadosDaContaResponse>
 
+
     @Get("/clientes/{clienteId}")
     fun consultaCliente(@PathVariable clienteId: UUID ): HttpResponse<DadosDoClienteResponse>
 
@@ -32,12 +33,7 @@ class DadosDoClienteResponse(
     val nome: String,
     val cpf: String,
     val instituicao: Instituicao
-) {
-    override fun toString(): String {
-        return "DadosDoClienteResponse(id=$id, nome='$nome', cpf='$cpf', instituicao=$instituicao)"
-    }
-}
-
+)
 
 data class Instituicao(
     val nome: String,
@@ -49,15 +45,3 @@ data class Titular(
     val cpf: String
 )
 
-
-
-
-
-/*
-id	string($uuid)
-nome	string
-cpf	string
-instituicao	InstituicaoResponse{
-    nome	string
-            ispb	string
-}*/
