@@ -26,6 +26,7 @@ sealed class Filtro {
         @field:NotBlank @field:ValidUUID val pixId: String,
     ) : Filtro() {
 
+
         val pixIdAsUuid = UUID.fromString(pixId)
         val clienteIdAsUuid = UUID.fromString(clienteId)
 
@@ -39,9 +40,7 @@ sealed class Filtro {
                 .orElseThrow { ObjectNotFoundException("Chave pix não encontrada ou não pertence a esse usuário") }
 
             val contaInfo = itauClient.consultaConta(clienteIdAsUuid.toString(), chavePix.tipoDeConta.toString()).body()
-
             return ChavePixInfo.of(chavePix, contaInfo)
-
         }
 
     }

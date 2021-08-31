@@ -28,6 +28,7 @@ class ListaChavePixEndpoint(
     ) {
 
         val filtro = request.toModel(validator)
+
         val chaveInfo = filtro.filtra(repository = repository, itauClient = itauClient,bcbClient = bcbClient)
 
         responseObserver.onNext(ListaChavePixResponseConverter().convert(chaveInfo))
