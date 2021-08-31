@@ -3,12 +3,10 @@ package com.zup.client
 import com.zup.TipoDeConta
 import com.zup.pix.cadastra.ChavePix
 import com.zup.pix.cadastra.TipoDeChavePix
+import com.zup.pix.lista.ChavePixInfo
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
-import io.micronaut.http.annotation.Body
-import io.micronaut.http.annotation.Delete
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.*
 import io.micronaut.http.client.annotation.Client
 import java.time.LocalDateTime
 
@@ -25,7 +23,16 @@ interface BcbClient {
     )
     fun deletaChavePixBcb(
         @PathVariable key: String,
-        @Body request: DeletePixKeyRequest): HttpResponse<DeletePixKeyResponse>
+        @Body request: DeletePixKeyRequest
+    ): HttpResponse<DeletePixKeyResponse>
+
+
+    @Get(
+        value = "/{key}",
+        consumes = [MediaType.APPLICATION_XML],
+        produces = [MediaType.APPLICATION_XML]
+    )
+    fun findByKey(@PathVariable key: String): HttpResponse<PixKeyDetailsResponse>
 
 }
 
@@ -69,16 +76,47 @@ class CreatePixKeyResponse(
 )
 
 
-class DeletePixKeyRequest (
+class DeletePixKeyRequest(
     val key: String,
     val participant: String
 )
 
-class DeletePixKeyResponse (
+class DeletePixKeyResponse(
     val key: String,
     val participant: String,
     val deletedAt: LocalDateTime
 )
+
+data class PixKeyDetailsResponse(
+    val keyType: PixKeyType,
+    val key: String,
+    val bankAccount: BankAccount,
+    val owner: Owner,
+    val createdAt: LocalDateTime
+) {
+
+    fun toModel(): ChavePixInfo {
+        return ChavePixInfo(
+            tipoDeChave = keyType.domainType!!,
+            valorDaChave = this.key,
+            tipoDeConta = when (this.bankAccount.accountType) {
+                BankAccount.AccountType.CACC -> TipoDeConta.CONTA_CORRENTE
+                BankAccount.AccountType.SVGS -> TipoDeConta.CONTA_POUPANCA
+            },
+            instituicao = bankAccount.participant,
+            nomeDoTitular = owner.name,
+            cpfDoTitular = owner.taxIdNumber,
+            agencia = bankAccount.branch,
+            numeroDaConta = bankAccount.accountNumber
+        )
+    }
+
+    override fun toString(): String {
+        return "PixKeyDetailsResponse(keyType=$keyType, key='$key', bankAccount=$bankAccount, owner=$owner, createdAt=$createdAt)"
+    }
+
+
+}
 
 
 class BankAccount(

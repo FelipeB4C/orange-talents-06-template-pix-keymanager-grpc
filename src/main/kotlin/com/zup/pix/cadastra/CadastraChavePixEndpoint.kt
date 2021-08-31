@@ -37,7 +37,7 @@ fun CadastraChavePixRequest.toModel(): ChavePixFieldValidation {
     val chaveUUID = UUID.fromString(this.clienteId)
     return ChavePixFieldValidation(
         clienteId = chaveUUID,
-        valorDaChave = this.chave,
+        valorDaChave = this.valorDaChave,
         tipoDeChave = when (tipoDeChave) {
             TipoDeChave.CHAVE_DESCONHECIDA -> null
             else -> TipoDeChavePix.valueOf(tipoDeChave.name)

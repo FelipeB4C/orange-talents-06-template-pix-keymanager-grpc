@@ -1,8 +1,10 @@
 package com.zup.pix.cadastra
 
 import com.zup.TipoDeConta
+import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*
+import javax.validation.constraints.FutureOrPresent
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
@@ -33,5 +35,12 @@ data class ChavePix(
     @GeneratedValue
     val id: UUID? = null
 
+    val criadaEm: LocalDateTime = LocalDateTime.now()
+
+
+    fun pertenceAo(possivelDono: UUID): Boolean{
+        if (clienteId != possivelDono) return false
+        return true
+    }
 
 }
