@@ -111,11 +111,6 @@ data class PixKeyDetailsResponse(
         )
     }
 
-    override fun toString(): String {
-        return "PixKeyDetailsResponse(keyType=$keyType, key='$key', bankAccount=$bankAccount, owner=$owner, createdAt=$createdAt)"
-    }
-
-
 }
 
 

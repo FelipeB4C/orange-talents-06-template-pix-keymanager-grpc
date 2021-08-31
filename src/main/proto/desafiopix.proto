@@ -23,6 +23,10 @@ service KeymanagerListaService {
     rpc listaChavePix(ListaChavePixRequest) returns (ListaChavePixResponse);
 }
 
+service KeymanagerListaTodasService {
+    rpc listaTodasChavePix(ListaTodasChavesPixRequest) returns (ListaTodasChavesPixResponse);
+}
+
 enum TipoDeChave {
     CHAVE_DESCONHECIDA = 0;
     CPF = 1;
@@ -80,7 +84,7 @@ message ListaChavePixRequest {
         string valorDaChave = 2;
     }
 }
-message  ListaChavePixResponse {
+message ListaChavePixResponse {
     message ChavePix {
         message ContaInfo {
             TipoDeConta tipoDeConta = 1;
@@ -100,4 +104,27 @@ message  ListaChavePixResponse {
     string clienteId = 1;
     string pixId = 2;
     ChavePix chave = 3;
+}
+
+/*
+* Lista todas chave pix
+*/
+
+message ListaTodasChavesPixRequest {
+    string clienteId = 1;
+}
+
+message ListaTodasChavesPixResponse {
+
+    message ChavePix {
+        string pixId = 1;
+        TipoDeChave tipoDeChave = 2;
+        string valorDaChave = 3;
+        TipoDeConta tipoDeConta = 4;
+        google.protobuf.Timestamp criadaEm = 5;
+    }
+
+    string clienteId = 1;
+    repeated ChavePix chaves = 2;
+
 }

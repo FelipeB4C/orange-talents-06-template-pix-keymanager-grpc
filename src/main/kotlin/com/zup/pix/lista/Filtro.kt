@@ -34,10 +34,6 @@ sealed class Filtro {
             itauClient: ItauClient,
             bcbClient: BcbClient
         ): ChavePixInfo {
-/*            return repository.findById(pixIdAsUuid())
-                .filter { it.pertenceAo(clienteIdAsUuid()) }
-                .map(ChavePixInfo::of)
-                .orElseThrow { ObjectNotFoundException("Chave pix não encontrada") }*/
 
             val chavePix = repository.findByIdAndClienteId(pixIdAsUuid, clienteIdAsUuid)
                 .orElseThrow { ObjectNotFoundException("Chave pix não encontrada ou não pertence a esse usuário") }

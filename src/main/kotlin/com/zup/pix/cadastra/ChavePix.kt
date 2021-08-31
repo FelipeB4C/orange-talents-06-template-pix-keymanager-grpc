@@ -12,10 +12,6 @@ import javax.validation.constraints.Size
 @Entity
 data class ChavePix(
 
-    //@Column(unique = true, nullable = false)
-    //val pixId: UUID
-
-    @Column(unique = true, nullable = false)
     @field:NotNull val clienteId: UUID,
 
     @Column(unique = true, length = 77, nullable = false)
